@@ -31,7 +31,7 @@ class Basic(commands.Cog):
             embed.color = Color.random()
         else:
             embed.color = color_dic[color]
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="help", description="ヘルプの表示")
     async def help(self, interaction:Interaction):
