@@ -1,26 +1,36 @@
 import discord
-from discord import app_commands, Embed, Interaction, Object
+from discord import app_commands, Embed, Interaction, Object, Color
+from discord.app_commands import Choice
 from discord.ext import commands
 from typing import Optional
 
+color_dic = {
+    "red":Color.red(), 
+    "blue":Color.blue(), 
+    "green":Color.green(), 
+    "orange":Color.orange(),
+    "purple":Color.purple()
+    }
+
 class Basic(commands.Cog):
-    
     def __init__(self, bot:commands.Bot):
         self.bot = bot
 
     @app_commands.command(name="embed", description="embed(埋め込みテキスト)の作成")
-    @app_commands.describe(title="タイトル", description="内容", author="作者")
-    async def makeembed(
-        self,
-        interaction: Interaction,
-        title: str,
-        description: str,
-        author: Optional[discord.Member] = None
-        ):
+    @app_commands.describe(title="タイトル", description="内容", color="色", author="作者")
+    @app_commands.choices(color=[Choice(name=str(i), value=i) for i in color_dic])
+    async def makeembed(self, interaction: Interaction, title: str, description: str, color: str = None, author: Optional[discord.Member] = None):
         embed = Embed()
         embed.title = title
         embed.description = description
-        embed.set_author(name=author, icon_url=author.display_avatar.url)
+        if author == None:
+            pass
+        else:
+            embed.set_author(name=author, icon_url=author.display_avatar.url)
+        if color == None:
+            embed.color = Color.random()
+        else:
+            embed.color = color_dic[color]
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="help", description="ヘルプの表示")
