@@ -216,4 +216,4 @@ class Sokuji(commands.Cog):
             guild_sokujidata["original_interaction"] = interaction
 
 async def setup(bot:commands.Bot):
-    await bot.add_cog(Sokuji(bot), guilds=[Object(id=904976766316187678)]) #guildsは公開時に削除
+    await bot.add_cog(Sokuji(bot), guilds=[Object(id=965811655911022602)]) #guildsは公開時に削除
