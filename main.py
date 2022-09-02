@@ -9,7 +9,7 @@ class Bot(commands.Bot):
 
     def __init__(self):
         super().__init__(command_prefix="!", intents=intents, application_id=997868018828845056)
-        self.initial_extensions = ["cogs.basic"]
+        self.initial_extensions = ["cogs.basic", "cogs.sokuji"]
         
     async def setup_hook(self):
         for extension in self.initial_extensions:
