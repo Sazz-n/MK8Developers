@@ -3,7 +3,7 @@ aiosignal==1.2.0
 async-timeout==4.0.2
 attrs==21.4.0
 charset-normalizer==2.1.0
-discord.py @ git+https://github.com/Rapptz/discord.py@c61e407b502e7f1867b3b2d3b62befcc321d2429
+discord.py @ git+https://github.com/Rapptz/discord.py@aa0acf1d567ff95467472ce5d7377c9eb6f541be
 frozenlist==1.3.0
 idna==3.3
 multidict==6.0.2
