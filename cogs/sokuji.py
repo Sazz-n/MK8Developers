@@ -50,7 +50,7 @@ class Sokuji(commands.Cog):
 
     class SokujiEmbed(Embed):
         def __init__(self, sokujidata, interaction: Interaction):
-            super().__init__(color=Color.default(), title="即時集計")
+            super().__init__(color=Color.blue(), title="即時集計")
             guild_sokuji = sokujidata[interaction.guild_id]
             team_score_sum = 0
             enemy_score_sum = 0
