@@ -141,14 +141,21 @@ class Sokuji(commands.Cog):
         self.sokujidata[interaction.guild_id]["enemy"] = enemy
         self.sokujidata[interaction.guild_id]["original_interaction"] = interaction
         embed = Sokuji.SokujiEmbed(sokujidata=self.sokujidata, interaction=interaction)
-        await interaction.response.send_message(embed=embed, view=Sokuji.View(bot=self.bot, sokujidata=self.sokujidata))
+        view = Sokuji.View(bot=self.bot, sokujidata=self.sokujidata)
+        await interaction.response.send_message(embed=embed, view=view)
+        view.message = await interaction.original_response()
 
     class View(View):
         def __init__(self, bot, sokujidata):
-            super().__init__(timeout=None)
+            super().__init__(timeout=600)
             self.add_item(Sokuji.InputButton(bot=bot, sokujidata=sokujidata))
             self.add_item(Sokuji.EditButton(bot=bot, sokujidata=sokujidata))
-    
+
+        async def on_timeout(self):
+            for item in self.children:
+                item.disabled = True
+            await self.message.edit(view=self)
+            
     class InputButton(Button):
         def __init__(self, bot, sokujidata):
             super().__init__(label="順位入力", style=ButtonStyle.red)
