@@ -1,6 +1,6 @@
 from discord import app_commands, Interaction, Object, Attachment
 from discord.ext import commands
-from . import makeScoreTable
+from .peperon import makeScoreTable
 
 class Pepe(commands.Cog):
     def __init__(self, bot:commands.Bot):
@@ -16,11 +16,6 @@ class Pepe(commands.Cog):
                 await interaction.followup.send(f"`{pointListMsg}`\n{msg}", ephemeral=True)
         else:
             await interaction.followup.send(f"```画像から得点を読み取れませんでした```", ephemeral=True)
-
-    @app_commands.command(name="team", description="")
-    async def team(self, interaction: Interaction):
-        pass
-
 
 async def setup(bot:commands.Bot):
     await bot.add_cog(Pepe(bot), guilds=[Object(id=965811655911022602)]) #guildsは公開時に削除
