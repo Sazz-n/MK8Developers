@@ -94,7 +94,6 @@ def numberJudge(img, imgType):
             break
     return number
 
-
 def imgTypeJudge(img, msg):#
     if msg == "p":#
         type = 1#
@@ -261,4 +260,5 @@ def main(img, attachment):
     else:
         msg = "```\nファイル名が長すぎます。30文字以内に変更して再アップロードしてください。\n```"
         checkFlag = False
+        
     return msg, pointListMsg, checkFlag

@@ -39,7 +39,7 @@ class Basic(commands.Cog):
 
             if len(choice_li) < 11:
 
-                await interaction.response.send_message(embed=Basic.PollEmbed(title=self.daimei.value, choice=choice_li))
+                await interaction.response.send_message(embed=Basic.PollEmbed(title=self.daimei.value, choice=choice_li), ephemeral=True)
 
                 msg = await interaction.original_response()
                 emoji = ["0️⃣","1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣"]
@@ -65,7 +65,7 @@ class Basic(commands.Cog):
 
     @app_commands.command(name="embed", description="embed(埋め込みテキスト)の作成")
     @app_commands.describe(title="タイトル", description="内容", color="色", author="作者")
-    @app_commands.choices(color=[Choice(name=str(i), value=i) for i in self.color_dic])
+    @app_commands.choices(color=[Choice(name=str(i), value=i) for i in color_dic])
     async def makeembed(self, interaction: Interaction, title: str, description: str, color: str = None, author: Optional[discord.Member] = None):
 
         embed = Embed()

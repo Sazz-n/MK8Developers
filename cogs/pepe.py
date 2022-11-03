@@ -6,7 +6,7 @@ class Pepe(commands.Cog):
     def __init__(self, bot:commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name="upload", description="リザルトの読み込み")
+    @app_commands.command(name="upload", description="リザルト画像のアップロード")
     async def upload(self, interaction: Interaction, attachment: Attachment):
         await interaction.response.defer(thinking=False, ephemeral=True)
         checkFlag, img = makeScoreTable.checkInputImgSize(attachment)

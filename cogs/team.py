@@ -4,108 +4,81 @@ from discord.ext import commands
 from .database import psql
 
 class Team(commands.Cog):
-
     def __init__(self, bot:commands.Bot):
         self.bot = bot
 
     @app_commands.command(name="team", description="チームの管理")
     async def team(self, interaction: Interaction):
-
-        conn, cur = psql.connectDB()
-        data = psql.search_GuildID(conn, cur, interaction.guild_id)
-        psql.closeDB(conn, cur)
-
-        if data:
-            await interaction.response.send_message(embed=Team.InfoEmbed(data), view=Team.DropdownView(), ephemeral=True)
+        data = psql.search_GuildID(interaction.guild_id)
+        if data == None:
+            await interaction.response.send_modal(Team.InfoModal(pre_team_name="", status="Regist"))
         else:
-            await interaction.response.send_modal(Team.Modal(d_team_name="", status="Regist"))
+            await interaction.response.send_message(embed=Team.InfoEmbed(data), view=Team.DropdownView(), ephemeral=True)
         
     class InfoEmbed(Embed):
-        
-        def __init__(self, data):
-            super().__init__(color=Color.red(), title=f"{data[2]}")
-
-            self.add_field(name="ID", value=f"{data[0]}", inline=False)
-            self.add_field(name="登録日", value=f"{format(data[3], '%Y-%m-%d')}", inline=False)
-            self.set_footer(text=f"Last Update:{format(data[4], '%Y-%m-%d')}")
+        def __init__(self, data: dict):
+            super().__init__(color=Color.red(), title=f"{data['team_name']}")
+            self.add_field(name="ID", value=f"{data['id']}", inline=False)
+            self.add_field(name="登録日", value=f"{format(data['timestamp'], '%Y-%m-%d')}", inline=False)
+            self.set_footer(text=f"最終更新日 : {format(data['last_update'], '%Y-%m-%d')}")
     
+    class DropdownView(View):
+        def __init__(self):
+            super().__init__()
+            self.add_item(Team.Dropdown())
+
     class Dropdown(Select):
         def __init__(self):
-            
             options = [
-                SelectOption(label="チーム情報の編集", emoji="📝"),
-                SelectOption(label="チームの削除", emoji="⛔"),
-                SelectOption(label="バグ報告・意見箱")
+                SelectOption(label="戦績の登録", emoji="📝"),
+                SelectOption(label="チーム情報の編集", emoji="🔧"),
             ]
-
             super().__init__(placeholder='コマンドを選択', min_values=1, max_values=1, options=options)
 
         async def callback(self, interaction: Interaction):
-            
-            conn, cur = psql.connectDB()
-            data = psql.search_GuildID(conn, cur, interaction.guild_id)
-            psql.closeDB(conn, cur)
-
+            data = psql.search_GuildID(interaction.guild_id)
             if self.values[0] == "チーム情報の編集":
+                await interaction.response.send_modal(Team.InfoModal(status="Edit", pre_team_name=data['team_name']))
+            elif self.values[0] == "戦績の登録":
+                await interaction.response.send_modal(Team.RecordModal(status="Record"))
 
-                await interaction.response.send_modal(Team.Modal(d_team_name=data[2], status="Edit"))
-
-            elif self.values[1] == "チームの削除":
-
-                pass
-
-            elif self.values[2] == "バグ報告・意見箱":
-
-                pass
-
-
-    class DropdownView(View):
-
-        def __init__(self):
-            super().__init__()
-
-            self.add_item(Team.Dropdown())
-
-    class Modal(Modal):
-
-        def __init__(self, d_team_name, status):
-
+    class InfoModal(Modal):
+        def __init__(self, status, pre_team_name):
             self.status = status
-
             if status == "Regist":
-
                 super().__init__(title="チーム情報登録フォーム", timeout=600)
-
-                self.team_name = TextInput(label="チーム名(10文字以内)")
-
+                self.team_name = TextInput(label="チーム名(10文字以内)", required=True)
                 self.add_item(self.team_name)
-            
             elif status == "Edit":
-
                 super().__init__(title="チーム情報編集フォーム", timeout=600)
-
-                self.team_name = TextInput(label="チーム名(10文字以内)", default=f"{d_team_name}")
-
+                self.team_name = TextInput(label="チーム名(10文字以内)", required=True, default=f"{pre_team_name}")
                 self.add_item(self.team_name)
             
         async def on_submit(self, interaction: Interaction):
-            
             if self.status == "Regist":
-
-                conn, cur = psql.connectDB()
-                psql.register_GuildData(conn, cur, team_name=self.team_name.value, guild_id=interaction.guild_id)
-                psql.commitcloseDB(conn, cur)
-
+                psql.register_GuildData(team_name=self.team_name.value, guild_id=interaction.guild_id)
                 await interaction.response.send_message("登録が完了しました\n再度`/team`コマンドを使用することでチーム情報を確認できます", ephemeral=True)
-
             elif self.status == "Edit":
-
-                conn, cur = psql.connectDB()
-                psql.update_TeamName(conn, cur, new_team_name=self.team_name.value, guild_id=interaction.guild_id)
-                psql.commitcloseDB(conn, cur)
-
+                psql.update_TeamName(new_team_name=self.team_name.value, guild_id=interaction.guild_id)
                 await interaction.response.send_message("編集が完了しました\n再度`/team`コマンドを使用することでチーム情報を確認できます", ephemeral=True)
 
-async def setup(bot:commands.Bot):
+    class RecordModal(Modal):
+        def __init__(self, status):
+            self.status = status
+            if status == "Record":
+                super().__init__(title="戦績登録フォーム", timeout=600)
+                self.enemy_name = TextInput(label="敵チーム名(10文字以内)", required=True, max_length=10)
+                self.team_score = TextInput(label="自チームの点数", required=True)
+                self.enemy_score = TextInput(label="敵チームの点数", required=True)
+                for item in [self.enemy_name, self.team_score, self.enemy_score]:
+                    self.add_item(item)
 
+        async def on_submit(self, interaction: Interaction):
+            if self.status == "Record":
+                data = psql.search_GuildID(interaction.guild_id)
+                team_name = data['team_name']
+                psql.register_WarData(team_name=team_name, team_score=self.team_score.value, enemy_name=self.enemy_name.value, enemy_score=self.enemy_score.value)
+                await interaction.response.send_message("戦績が登録されました", ephemeral=True)
+
+async def setup(bot:commands.Bot):
     await bot.add_cog(Team(bot), guilds=[Object(id=965811655911022602)]) #guildsは公開時に削除
